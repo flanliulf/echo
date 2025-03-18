@@ -174,13 +174,28 @@ git init
 git add .
 git commit -m "Initial commit"
 git remote add origin git@github.com:flanliulf/echo.git
-git push -u origin master
+git push -u origin main  # 使用main作为默认分支
 
 # 在远程服务器上克隆仓库
 ssh username@server_ip "cd /root && git clone git@github.com:flanliulf/echo.git echo"
 ```
 
 项目GitHub仓库地址：[https://github.com/flanliulf/echo](https://github.com/flanliulf/echo)
+
+#### 克隆仓库
+
+如果您想克隆此仓库，可以使用以下命令：
+
+```bash
+# 克隆仓库
+git clone git@github.com:flanliulf/echo.git
+
+# 进入项目目录
+cd echo
+
+# 确保您在main分支上
+git checkout main
+```
 
 ### 方法5：使用Docker镜像
 
@@ -231,3 +246,24 @@ ssh username@server_ip "docker pull your_dockerhub_username/echo-service && dock
    ```
 
 **注意**：上述命令中的`username@server_ip`需要替换为实际的服务器用户名和IP地址。
+
+## 贡献指南
+
+如果您想为这个项目做出贡献，请按照以下步骤操作：
+
+1. Fork这个仓库
+2. 创建您的特性分支：`git checkout -b feature/amazing-feature`
+3. 提交您的更改：`git commit -m '添加一些很棒的功能'`
+4. 推送到分支：`git push origin feature/amazing-feature`
+5. 提交Pull Request
+
+### 开发规范
+
+- 遵循JavaScript Standard Style代码风格
+- 确保所有测试通过
+- 为新功能添加适当的测试
+- 更新文档以反映任何更改
+
+### 问题反馈
+
+如果您发现任何问题或有改进建议，请在GitHub仓库中创建一个Issue。
