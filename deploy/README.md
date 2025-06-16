@@ -16,13 +16,17 @@
 使用以下任一方法将项目上传到服务器：
 
 ```bash
-# 方法1: 使用scp
+# 方法1: 使用rsync（推荐，自动排除不必要文件）
+rsync -avz --exclude 'node_modules' --exclude '.git' /Users/fancyliu/echo/ username@server_ip:/root/www/echo/
+
+# 方法2: 使用scp（需要先清理本地项目）
+# 先在本地临时删除 node_modules 目录
+rm -rf /Users/fancyliu/echo/node_modules
 scp -r /Users/fancyliu/echo username@server_ip:/root/www/
+# 上传完成后恢复本地依赖
+cd /Users/fancyliu/echo && npm install
 
-# 方法2: 使用rsync
-rsync -avz --exclude 'node_modules' /Users/fancyliu/echo/ username@server_ip:/root/www/echo/
-
-# 方法3: 使用Git
+# 方法3: 使用Git（推荐，最干净的方式）
 ssh username@server_ip "cd /root/www && git clone https://github.com/flanliulf/echo.git echo"
 ```
 

@@ -125,46 +125,44 @@ pm2 delete echo-service
 
 以下是几种将本地工程上传到远程Ubuntu 20.04服务器的方法：
 
-### 方法1：使用SCP（安全复制）
+### 方法1：使用rsync（推荐，智能同步）
 
 ```bash
-# 上传整个项目（包含所有子目录）
-scp -r /Users/fancyliu/echo username@server_ip:/root/www/
+# 上传整个项目，自动排除不必要文件
+rsync -avz --exclude 'node_modules' --exclude '.git' --exclude '.DS_Store' /Users/fancyliu/echo/ username@server_ip:/root/www/echo/
 
-# 如果只想上传顶层文件（不包含子目录）
-scp /Users/fancyliu/echo/* username@server_ip:/root/www/echo/
-
-# 分别上传顶层文件和必要的子目录
-scp /Users/fancyliu/echo/* username@server_ip:/root/www/echo/
-scp -r /Users/fancyliu/echo/src username@server_ip:/root/www/echo/
-scp -r /Users/fancyliu/echo/deploy username@server_ip:/root/www/echo/
+# 如果需要显示详细进度
+rsync -avz --progress --exclude 'node_modules' --exclude '.git' /Users/fancyliu/echo/ username@server_ip:/root/www/echo/
 ```
 
-### 方法2：使用rsync（增量同步）
+### 方法2：使用SCP（需要预处理）
 
 ```bash
-# 上传整个项目（包含所有子目录）
-rsync -avz --exclude 'node_modules' /Users/fancyliu/echo/ username@server_ip:/root/www/echo/
+# 先临时删除不必要的目录（推荐先备份）
+rm -rf /Users/fancyliu/echo/node_modules
 
-# 如果只想上传顶层文件（不包含子目录）
-rsync -av --exclude='*/' /Users/fancyliu/echo/ username@server_ip:/root/www/echo/
+# 上传项目
+scp -r /Users/fancyliu/echo username@server_ip:/root/www/
+
+# 恢复本地依赖
+cd /Users/fancyliu/echo && npm install
 ```
 
 ### 方法3：使用tar打包后上传
 
 ```bash
-# 在本地打包
+# 在本地打包（排除不必要文件）
 cd /Users/fancyliu
-tar -czf echo.tar.gz echo
+tar -czf echo.tar.gz --exclude='echo/node_modules' --exclude='echo/.git' --exclude='echo/.DS_Store' echo
 
 # 上传tar包
 scp echo.tar.gz username@server_ip:/root/www/
 
 # 在远程服务器解压
-ssh username@server_ip "cd /root/www && tar -xzf echo.tar.gz"
+ssh username@server_ip "cd /root/www && tar -xzf echo.tar.gz && rm echo.tar.gz"
 ```
 
-### 方法4：使用Git仓库
+### 方法4：使用Git仓库（推荐，最干净）
 
 ```bash
 # 在本地将项目推送到Git仓库
