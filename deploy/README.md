@@ -42,9 +42,11 @@ cd /root/www/echo
 # 给脚本添加执行权限（如果需要）
 chmod +x deploy/deploy.sh deploy/undeploy.sh
 
-# 运行部署脚本
+# 运行部署脚本（脚本会自动检测当前位置）
 sudo ./deploy/deploy.sh
 ```
+
+**注意**: 部署脚本现在支持在项目目录内直接运行，会自动跳过文件复制步骤。
 
 ### 3. 验证部署
 

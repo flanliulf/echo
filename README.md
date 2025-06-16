@@ -226,9 +226,9 @@ ssh username@server_ip "docker pull your_dockerhub_username/echo-service && dock
    # 使用PM2启动
    pm2 start ecosystem.config.js --env production
    
-   # 或使用部署脚本
+   # 或使用部署脚本（推荐）
    chmod +x deploy/deploy.sh
-   ./deploy/deploy.sh
+   sudo ./deploy/deploy.sh
    ```
 
 4. 设置PM2开机自启：

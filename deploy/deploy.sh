@@ -43,13 +43,24 @@ if [ -d "/root/www/echo/node_modules" ]; then
     log_info "备份已创建: $backup_dir"
 fi
 
-# 复制项目文件
-log_info "复制项目文件到 /root/www/echo"
-cp -r ./* /root/www/echo/
+# 获取当前工作目录
+current_dir=$(pwd)
+target_dir="/root/www/echo"
+
+# 检查是否已在目标目录中
+if [ "$current_dir" = "$target_dir" ]; then
+    log_info "已在目标目录中，跳过文件复制步骤"
+else
+    # 复制项目文件
+    log_info "复制项目文件从 $current_dir 到 $target_dir"
+    cp -r ./* /root/www/echo/
+    
+    # 切换到目标目录
+    cd /root/www/echo
+fi
 
 # 安装依赖
 log_info "安装生产环境依赖..."
-cd /root/www/echo
 npm install --production
 
 # 检查Node.js版本
