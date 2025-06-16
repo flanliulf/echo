@@ -30,7 +30,7 @@ echo/
 
 ## 安装与运行
 
-### 本地开发
+### 本地运行
 
 确保您的系统上安装了Node.js v20.19.0：
 
@@ -39,7 +39,6 @@ echo/
 nvm install 20.19.0
 nvm use 20.19.0
 ```
-
 安装依赖并启动开发服务器：
 
 ```bash
@@ -63,7 +62,7 @@ chmod +x deploy/deploy.sh
 sudo ./deploy/deploy.sh
 ```
 
-这将把服务部署到 `/root/echo` 目录，并使用PM2和systemd进行管理。
+这将把服务部署到 `/root/www/echo` 目录，并使用PM2和systemd进行管理。
 
 #### 方法2：使用Docker
 
@@ -120,7 +119,7 @@ pm2 delete echo-service
 
 ## 部署路径
 
-在Ubuntu 20.04服务器上，该服务部署在 `/root/echo` 目录下。
+在Ubuntu 20.04服务器上，该服务部署在 `/root/www/echo` 目录下。
 
 ## 将本地工程上传到远程服务器
 
@@ -130,46 +129,46 @@ pm2 delete echo-service
 
 ```bash
 # 上传整个项目（包含所有子目录）
-scp -r /Users/fancyliu/VscodeWorkspace/echo username@server_ip:/root/
+scp -r /Users/fancyliu/echo username@server_ip:/root/www/
 
 # 如果只想上传顶层文件（不包含子目录）
-scp /Users/fancyliu/VscodeWorkspace/echo/* username@server_ip:/root/echo/
+scp /Users/fancyliu/echo/* username@server_ip:/root/www/echo/
 
 # 分别上传顶层文件和必要的子目录
-scp /Users/fancyliu/VscodeWorkspace/echo/* username@server_ip:/root/echo/
-scp -r /Users/fancyliu/VscodeWorkspace/echo/src username@server_ip:/root/echo/
-scp -r /Users/fancyliu/VscodeWorkspace/echo/deploy username@server_ip:/root/echo/
+scp /Users/fancyliu/echo/* username@server_ip:/root/www/echo/
+scp -r /Users/fancyliu/echo/src username@server_ip:/root/www/echo/
+scp -r /Users/fancyliu/echo/deploy username@server_ip:/root/www/echo/
 ```
 
 ### 方法2：使用rsync（增量同步）
 
 ```bash
 # 上传整个项目（包含所有子目录）
-rsync -avz --exclude 'node_modules' /Users/fancyliu/VscodeWorkspace/echo/ username@server_ip:/root/echo/
+rsync -avz --exclude 'node_modules' /Users/fancyliu/echo/ username@server_ip:/root/www/echo/
 
 # 如果只想上传顶层文件（不包含子目录）
-rsync -av --exclude='*/' /Users/fancyliu/VscodeWorkspace/echo/ username@server_ip:/root/echo/
+rsync -av --exclude='*/' /Users/fancyliu/echo/ username@server_ip:/root/www/echo/
 ```
 
 ### 方法3：使用tar打包后上传
 
 ```bash
 # 在本地打包
-cd /Users/fancyliu/VscodeWorkspace
+cd /Users/fancyliu
 tar -czf echo.tar.gz echo
 
 # 上传tar包
-scp echo.tar.gz username@server_ip:/root/
+scp echo.tar.gz username@server_ip:/root/www/
 
 # 在远程服务器解压
-ssh username@server_ip "cd /root && tar -xzf echo.tar.gz"
+ssh username@server_ip "cd /root/www && tar -xzf echo.tar.gz"
 ```
 
 ### 方法4：使用Git仓库
 
 ```bash
 # 在本地将项目推送到Git仓库
-cd /Users/fancyliu/VscodeWorkspace/echo
+cd /Users/fancyliu/echo
 git init
 git add .
 git commit -m "Initial commit"
@@ -177,7 +176,7 @@ git remote add origin git@github.com:flanliulf/echo.git
 git push -u origin main  # 使用main作为默认分支
 
 # 在远程服务器上克隆仓库
-ssh username@server_ip "cd /root && git clone git@github.com:flanliulf/echo.git echo"
+ssh username@server_ip "cd /root/www && git clone git@github.com:flanliulf/echo.git echo"
 ```
 
 项目GitHub仓库地址：[https://github.com/flanliulf/echo](https://github.com/flanliulf/echo)
@@ -201,7 +200,7 @@ git checkout main
 
 ```bash
 # 在本地构建Docker镜像并推送到Docker Hub
-cd /Users/fancyliu/VscodeWorkspace/echo
+cd /Users/fancyliu/echo
 docker build -t your_dockerhub_username/echo-service .
 docker push your_dockerhub_username/echo-service
 
@@ -215,7 +214,7 @@ ssh username@server_ip "docker pull your_dockerhub_username/echo-service && dock
 
 1. 安装依赖：
    ```bash
-   cd /root/echo
+   cd /root/www/echo
    npm install --production
    ```
 
@@ -246,6 +245,94 @@ ssh username@server_ip "docker pull your_dockerhub_username/echo-service && dock
    ```
 
 **注意**：上述命令中的`username@server_ip`需要替换为实际的服务器用户名和IP地址。
+
+## 服务管理
+
+### 部署脚本使用
+
+项目包含了增强的部署脚本，提供了更好的错误检查和状态验证：
+
+```bash
+# 部署服务
+sudo ./deploy/deploy.sh
+
+# 卸载服务
+sudo ./deploy/undeploy.sh
+```
+
+### 服务状态检查
+
+```bash
+# 检查PM2状态
+pm2 status
+
+# 查看服务日志
+pm2 logs echo-service
+
+# 检查systemd服务状态
+systemctl status echo.service
+
+# 测试API端点
+curl http://localhost:3000/echo
+```
+
+### 服务更新
+
+当需要更新服务时，可以重新运行部署脚本：
+
+```bash
+# 上传新版本的代码后
+sudo ./deploy/deploy.sh
+```
+
+部署脚本会自动：
+- 备份现有部署
+- 停止旧服务
+- 安装新依赖
+- 启动新服务
+- 验证服务状态
+
+### 完全卸载
+
+如果需要完全移除Echo服务：
+
+```bash
+sudo ./deploy/undeploy.sh
+```
+
+卸载脚本将：
+- 停止并删除PM2中的服务
+- 禁用并删除systemd服务
+- 可选择删除部署目录和备份
+
+## 故障排除
+
+### 常见问题
+
+1. **端口冲突**：如果3000端口被占用，请检查是否有其他服务在使用该端口
+   ```bash
+   sudo netstat -tlnp | grep :3000
+   ```
+
+2. **权限问题**：确保以root权限运行部署脚本
+   ```bash
+   sudo ./deploy/deploy.sh
+   ```
+
+3. **Node.js版本不匹配**：确保服务器上安装了正确的Node.js版本
+   ```bash
+   node --version  # 应该是 v20.19.0
+   ```
+
+4. **PM2服务无法启动**：检查PM2日志
+   ```bash
+   pm2 logs echo-service
+   ```
+
+### 日志位置
+
+- PM2日志：`~/.pm2/logs/`
+- systemd日志：`journalctl -u echo.service`
 
 ## 贡献指南
 

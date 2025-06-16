@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=forking
 User=root
-WorkingDirectory=/root/echo
+WorkingDirectory=/root/www/echo
 ExecStart=/usr/local/bin/pm2 start ecosystem.config.js --env production
 ExecReload=/usr/local/bin/pm2 reload echo-service
 ExecStop=/usr/local/bin/pm2 stop echo-service
